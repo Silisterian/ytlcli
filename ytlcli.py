@@ -1,4 +1,3 @@
-import yt_dlp
 from dataclasses import dataclass
 from typing import List, Optional
 
