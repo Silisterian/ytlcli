@@ -1,5 +1,7 @@
 import time, os
+import threading
 from random import shuffle
+import warnings
 
 import json
 import yt_dlp
@@ -7,6 +9,8 @@ import vlc
 
 from dataclasses import dataclass
 from typing import List, Optional
+
+warnings.filterwarnings("ignore")
 
 @dataclass
 class VideoInfo:
@@ -25,6 +29,7 @@ class YTManager:
             'extract_flat': True,
             'format': 'bestaudio',
             'force_generic_extractor': True,
+            'no_warnings': True,
         }
         self.queue = []
         self.instance = vlc.Instance()
@@ -33,6 +38,11 @@ class YTManager:
             with open("playlist.json", 'w') as f:
                 json.dump({}, f)
         self.playlists = self.load_playlist()
+        self.is_playing = False
+        
+        self.event_manager = self.player.event_manager()
+        self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
+        
     
     def save_playlist(self, url: str, name: str):
         try:
@@ -121,7 +131,7 @@ class YTManager:
     def get_url_song(self, url) -> str:
         with yt_dlp.YoutubeDL(self.opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            print(info['url'])
+            
             return info['url']
 
     def pause(self):
@@ -144,11 +154,33 @@ class YTManager:
             print("No songs in the queue to play.")
             return None
         url = self.get_url_song(current_song.url)
-        # print(current_song)
-        media = self.instance.media_new(url)
-        self.player.set_media(media)
-
-        self.player.play()
-        time.sleep(1)  # Wait for the player to start
-        return self.player, self.instance
         
+        old_media = self.player.get_media()
+        if old_media:
+            old_media.release()
+            
+        media = self.instance.media_new(url)
+        
+        self.player.set_media(media)
+        
+        self.player.play()
+        
+        time.sleep(1)
+        
+        display_title = current_song.title if current_song.title else "Unknown Title"
+        print(f"Now playing: {display_title}")
+        
+        if self.queue:
+            next_song = self.queue[0]
+            next_title = next_song.title if next_song.title else "Unknown Title"
+            print(f"Up next: {next_title}")
+        
+        return self.player, self.instance
+    
+    def on_song_end(self, event):
+        if self.queue:
+            print(f"Next song: {self.queue[0].title}")
+            # Lancer play_song dans un thread séparé pour éviter le deadlock
+            threading.Thread(target=self.play_song, daemon=True).start()
+        else:
+            print("Queue is empty. Stopping playback.")

@@ -1,0 +1,2 @@
+[console_scripts]
+ytl = ytlcli:main

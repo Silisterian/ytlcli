@@ -24,6 +24,9 @@ def main():
             print("  show playlist - Show all saved playlists")
             print("  show queue - Show all videos in the current queue")
             print("  play - Play the first video in the queue")
+            print("  play <playlist_name> [rnd] - Play a saved playlist, optionally shuffled with 'rnd'")
+            print("  save <playlist_url> <playlist_name> - Save a playlist with a given name")
+            print("  del <playlist_name> - Delete a saved playlist")
             print("  pause - Pause playback")
             print("  stop - Stop playback")
             print("  volume <0-100> - Set volume level")
@@ -72,11 +75,14 @@ def main():
         elif cmd.startswith("play"):
             try:
                 arguments = cmd.split()[1:]
-                playlist_name, shuffle = arguments
-                if shuffle == 'rnd':
-                    shuffle = True 
+                if len(arguments) > 1:
+                    playlist_name, shuffle = arguments
+                    if shuffle == 'rnd':
+                        shuffle = True 
                 else:
+                    playlist_name = arguments[0]
                     shuffle = False
+                    
                 videos = yt_manager.fetch_playlistbyname(playlist_name, shuffle)
                 yt_manager.new_queue(videos)
                 yt_manager.play_song()
