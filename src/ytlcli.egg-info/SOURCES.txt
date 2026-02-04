@@ -1,9 +1,0 @@
-pyproject.toml
-src/ytlcli.py
-src/ytmanager.py
-src/ytlcli.egg-info/PKG-INFO
-src/ytlcli.egg-info/SOURCES.txt
-src/ytlcli.egg-info/dependency_links.txt
-src/ytlcli.egg-info/entry_points.txt
-src/ytlcli.egg-info/requires.txt
-src/ytlcli.egg-info/top_level.txt

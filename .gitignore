@@ -1,6 +1,0 @@
-playlist.json
-venv-ytlcli/
-__pycache__/
-*.pyc
-src/ytlcli.egg-info/
-.gitignore
