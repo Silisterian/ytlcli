@@ -60,7 +60,6 @@ class YTManager:
                         description=entry.get('description'),
                         tags=entry.get('tags')
                     )
-                print(f'url : {video.url}')
                 fetched_videos.append(video)
             return fetched_videos
         except Exception as e:

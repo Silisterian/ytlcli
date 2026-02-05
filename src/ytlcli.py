@@ -23,6 +23,7 @@ def main():
             print("  pl | playlist - Add a playlist")
             print("  show playlist - Show all saved playlists")
             print("  show queue - Show all videos in the current queue")
+            print("  show played - Show all videos that have been played")
             print("  play - Play the first video in the queue")
             print("  play <playlist_name> [rnd] - Play a saved playlist, optionally shuffled with 'rnd'")
             print("  save <playlist_url> <playlist_name> - Save a playlist with a given name")
@@ -98,8 +99,15 @@ def main():
                     else:
                         for idx, video in enumerate(videos, start=1):
                             print(f"{idx}. {video.title} - {video.duration}")
+                elif arguments == "played":
+                    videos = yt_manager.played_songs
+                    if not videos:
+                        print("No songs have been played yet.")
+                    else:
+                        for idx, video in enumerate(videos, start=1):
+                            print(f"{idx}. {video.title} - {video.duration}")
                 else:
-                    print(f"Unknown argument: {arguments}. Use 'show playlist' or 'show queue'.")
+                    print(f"Unknown argument: {arguments}. Use 'show playlist', 'show queue', or 'show played'.")
             except IndexError:
                 print("Usage: show <playlist|queue>")
         #CONTROLS PLAYER
