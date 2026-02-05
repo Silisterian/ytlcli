@@ -72,9 +72,8 @@ class YTManager:
     def save_playlist(self, url: str, name: str):
         try:
             if name in self.playlists:
-                print(f"Playlist '{name}' already exists. Overwriting.")
-                
-            self.playlists[name] = url
+                print(f"Playlist '{name}' already exists. Overwriting.")    
+            self.playlists[name] = {"playlist": url}
             print(self.playlists)
             with open("playlist.json", 'w') as f:
                 json.dump(self.playlists, f)
@@ -98,8 +97,6 @@ class YTManager:
                 return json.load(f)
         except json.JSONDecodeError:
             print("Fichier JSON corrompu, création d'un nouveau")
-        
-        # Si le fichier n'existe pas ou est corrompu
         return {}
 
     def show_playlists(self):
@@ -110,16 +107,43 @@ class YTManager:
         for name, url in self.playlists.items():
             print(f"{name}: {url}")
 
+    def add_song_to_playlist(self, playlist_name: str, video: VideoInfo):
+        old_entity = self.playlists
+        if not old_entity:
+            print(f"Playlist '{playlist_name}' not found.")
+            return
+        if type(old_entity[playlist_name]) == str:
 
-### These methods are used to fetch videos from a playlist, either by name or by URL. The fetch_playlistbyname method looks up the playlist URL based on the provided name and then calls fetch_playlist to retrieve the video information. If the sh parameter is set to True, it shuffles the list of videos before returning it. The fetch_playlist method uses yt_dlp to extract information about each video in the playlist and returns a list of VideoInfo objects containing details about each video.
+            old_entity[playlist_name] = {"playlist": old_entity[playlist_name],
+                      "songs": [
+                          {"id": 1,"url": video.url, "title": video.title}
+                      ]}
+        else:
+            lcount = len(old_entity[playlist_name]["songs"])
+            old_entity[playlist_name]["songs"].append({"id": lcount + 1, "url": video.url, "title": video.title})
+        self.playlists = old_entity
+        with open("playlist.json", 'w') as f:
+                json.dump(self.playlists, f)
+
+
+### These methods are used to fetch videos from a playlist, either by name or by URL. The fetch_playlistbyname method looks up the local playlist based on the provided name and then calls fetch_playlist to retrieve the video information. If the sh parameter is set to True, it shuffles the list of videos before returning it. The fetch_playlist method uses yt_dlp to extract information about each video in the playlist and returns a list of VideoInfo objects containing details about each video.
 ### fetched video are added to queue
 
     def fetch_playlistbyname(self, name: str, sh: bool = False) -> List[VideoInfo]:
-        url = self.playlists.get(name)
+        url = None
+        songs = []
+        if type(self.playlists[name]) == str:
+            url = self.playlists[name]
+        else:
+            url = self.playlists[name]['playlist']
+            songs = self.playlists[name]['songs']
         if not url:
             print(f"Playlist '{name}' not found.")
             return []
         vids = self.fetch_playlist(url)
+        if songs:
+            for song in songs:
+                vids.append(VideoInfo(title=song['title'], url=song['url']))
         if not sh:
             return vids
         shuffle(vids)

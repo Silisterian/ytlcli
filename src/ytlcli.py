@@ -69,6 +69,23 @@ def main():
             videos = yt_manager.fetch_playlist(playlist_url)
             yt_manager.add_videos(videos)
             print(f"Added {len(videos)} videos from the playlist.")
+        elif cmd.startswith("pls") or cmd.startswith("playlist"):
+            try:
+                arg = cmd.split(' ', 2)[1:]
+                if arg[0] == "add":
+                    if arg[1] == "current" or arg[1] == "curr":
+                        if not yt_manager.played_songs:
+                            print("No video is currently playing.")
+                            continue
+                        yt_manager.add_song_to_playlist("music", yt_manager.played_songs[-1])
+                        print("Usage: pl add current - Add the currently playing video to a saved playlist")
+                        continue
+
+                videos = yt_manager.fetch_playlistbyname(arg)
+                yt_manager.add_videos(videos)
+                print(f"Added {len(videos)} videos from the playlist '{arg}'.")
+            except IndexError:
+                print("Usage: pl <playlist_name>")
         elif cmd.startswith("save"):
             try:
                 arguments = cmd.split()[1:]
