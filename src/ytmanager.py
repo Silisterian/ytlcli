@@ -175,6 +175,9 @@ class YTManager:
     
     def stop(self):
         self.player.stop()
+
+    def resume(self):
+        self.player.play()
     
     def set_volume(self, volume):
         """Volume entre 0 et 100"""

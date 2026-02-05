@@ -142,6 +142,8 @@ def main():
             yt_manager.skip()
         elif cmd == "stop":
             yt_manager.stop()
+        elif cmd == "resume":
+            yt_manager.resume()
         else:
            print(f"Unknown command: {cmd}. Type 'help' for a list of commands.")
         
