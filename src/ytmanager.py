@@ -5,7 +5,8 @@ import warnings
 
 import json
 import yt_dlp
-import vlc 
+import vlc
+from youtube_search import YoutubeSearch
 
 from dataclasses import dataclass
 from typing import List, Optional
@@ -32,6 +33,7 @@ class YTManager:
             'no_warnings': True,
         }
         self.queue = []
+        self.played_songs = []
         self.instance = vlc.Instance()
         self.player = self.instance.media_player_new()
         if not os.path.exists("playlist.json"):
@@ -43,7 +45,31 @@ class YTManager:
         self.event_manager = self.player.event_manager()
         self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
         
-    
+
+###### Search management ######
+    def search(self, query: str, isplaylist: bool = False) -> List[VideoInfo]:
+        try:
+            results = YoutubeSearch(query, max_results=20).to_dict()
+            print(f"Search results for '{query}':")
+            fetched_videos = []
+            for entry in results:
+                video = VideoInfo(
+                        title=entry.get('title'),
+                        url="https://www.youtube.com" + entry.get('url_suffix').split('&')[0],  # Remove playlist parameter if present
+                        duration=entry.get('duration'),
+                        description=entry.get('description'),
+                        tags=entry.get('tags')
+                    )
+                print(f'url : {video.url}')
+                fetched_videos.append(video)
+            return fetched_videos
+        except Exception as e:
+            print(f"Error during search: {e}")
+            return []
+
+
+
+###### Playlists management ###### 
     def save_playlist(self, url: str, name: str):
         try:
             if name in self.playlists:
@@ -85,14 +111,9 @@ class YTManager:
         for name, url in self.playlists.items():
             print(f"{name}: {url}")
 
-    def add_video(self, video: VideoInfo):
-        self.queue.append(video)
 
-    def add_videos(self, videos: List[VideoInfo]):
-        self.queue.extend(videos)
-
-    def new_queue(self, videos: List[VideoInfo]):
-        self.queue = videos
+### These methods are used to fetch videos from a playlist, either by name or by URL. The fetch_playlistbyname method looks up the playlist URL based on the provided name and then calls fetch_playlist to retrieve the video information. If the sh parameter is set to True, it shuffles the list of videos before returning it. The fetch_playlist method uses yt_dlp to extract information about each video in the playlist and returns a list of VideoInfo objects containing details about each video.
+### fetched video are added to queue
 
     def fetch_playlistbyname(self, name: str, sh: bool = False) -> List[VideoInfo]:
         url = self.playlists.get(name)
@@ -125,8 +146,24 @@ class YTManager:
             print(f"Error fetching playlist: {e}")
             return []   
     
+
+###### Queue management ######
+
+    def add_video(self, video: VideoInfo):
+        self.queue.append(video)
+
+    def add_videos(self, videos: List[VideoInfo]):
+        self.queue.extend(videos)
+
+    def new_queue(self, videos: List[VideoInfo]):
+        self.queue = videos
+
     def list_videos(self) -> List[VideoInfo]:
         return self.queue
+
+
+###### Player management ######
+
 
     def get_url_song(self, url) -> str:
         with yt_dlp.YoutubeDL(self.opts) as ydl:
@@ -164,6 +201,8 @@ class YTManager:
         self.player.set_media(media)
         
         self.player.play()
+
+        self.played_songs.append(current_song)
         
         time.sleep(1)
         

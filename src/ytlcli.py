@@ -30,6 +30,39 @@ def main():
             print("  pause - Pause playback")
             print("  stop - Stop playback")
             print("  volume <0-100> - Set volume level")
+        elif cmd.startswith('search'):
+            try:
+                isplaylist = False
+                if cmd.split(' ',2)[1] == 'pl' or cmd.split(' ',2)[1] == 'playlist':
+                    isplaylist = True
+                    query = cmd.split(' ', 2)[1:]
+                    query.pop(0)
+                    query = str(' '.join(query))
+                    print (f"Searching for playlist '{query}'...")
+                if isplaylist == False and len(cmd.split()) > 1:
+                    query = cmd.split(' ', 1)[1:]
+                    query = str(' '.join(query))
+                print(f"Searching for '{query}'...")
+                
+                videos = yt_manager.search(query, isplaylist)
+                if not videos:
+                    print("No videos found for your search.")
+                else:
+                    for idx, video in enumerate(videos, start=1):
+                        print(f"{idx}. {video.title} - {video.duration}")
+                    selection = input("Enter the number of the video to add to the queue (use 'cancel' or 'c' to skip): ")
+                    if selection.lower() != 'cancel' and selection.lower() != 'c':
+                        try:
+                            selected_index = int(selection) - 1
+                            if 0 <= selected_index < len(videos):
+                                yt_manager.add_video(videos[selected_index])
+                                print(f"Added '{videos[selected_index].title}' to the queue.")
+                            else:
+                                print("Invalid selection. Please enter a valid number.")
+                        except ValueError:
+                            print("Invalid input. Please enter a number or 'cancel'.")
+            except IndexError:
+                print("Usage: search <query>")
         elif cmd == "pl" or cmd == "playlist":
             playlist_url = input("Enter playlist URL: ")
             videos = yt_manager.fetch_playlist(playlist_url)
