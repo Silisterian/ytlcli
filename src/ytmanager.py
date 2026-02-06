@@ -34,12 +34,16 @@ class YTManager:
         }
         self.queue = []
         self.played_songs = []
-        self.instance = vlc.Instance()
-        self.player = self.instance.media_player_new()
+        self.current_playlist = None
         if not os.path.exists("playlist.json"):
             with open("playlist.json", 'w') as f:
                 json.dump({}, f)
         self.playlists = self.load_playlist()
+
+        ### VLC player initialization
+        self.instance = vlc.Instance()
+        self.player = self.instance.media_player_new()
+        
         self.is_playing = False
         
         self.event_manager = self.player.event_manager()
@@ -107,7 +111,9 @@ class YTManager:
         for name, url in self.playlists.items():
             print(f"{name}: {url}")
 
-    def add_song_to_playlist(self, playlist_name: str, video: VideoInfo):
+    def add_song_to_playlist(self, playlist_name: str = None, video: VideoInfo = None):
+        if not playlist_name:
+            playlist_name = self.current_playlist
         old_entity = self.playlists
         if not old_entity:
             print(f"Playlist '{playlist_name}' not found.")
