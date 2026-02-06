@@ -1,6 +1,41 @@
 # 🎵 ytl (YouTube Library Interface)
 
 **ytl** is a lightweight, high-performance Command Line Interface (CLI) designed to search, play, and manage YouTube music and playlists directly from your terminal. 
+
+## 🚀 Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/Silisterian/ytl.git](https://github.com/silisterian/ytl.git)
+    cd ytl
+    ```
+
+2.  **Install dependencies:**
+    
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Run the application from the directory**
+    ```bash
+    python main.py
+    ```
+
+
+3. **Run YTL from anywhere**
+
+        ```bash
+    pip install -e .
+    ```
+
+    open a new CMD
+
+        ```bash
+    ytl
+        ```
+
+
+
 ## 🛠️ Commands
 
 ### Search
