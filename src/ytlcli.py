@@ -1,4 +1,14 @@
+
+import os
+import sys
+import time
+
 from ytmanager import YTManager
+
+def clear_console():
+    # Efface la console selon le système (Windows ou Unix)
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def display_welcome_message():
     print("Welcome to YTLCLI - Your YouTube Command Line Interface!")
@@ -45,13 +55,57 @@ def display_help():
 """
     print(help_text)
 
+def draw_dashboard(current_track, queue, selected_pl, last_output=None):
+    # Codes Couleurs
+    BOLD = "\033[1m"
+    GREEN = "\033[92m"
+    CYAN = "\033[96m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+    GRAY = "\033[90m"
 
+    clear_console()
+    
+    ui = []
+    ui.append(f"{BOLD}{CYAN}╔══════════════════ MUSIC DASHBOARD ══════════════════╗{RESET}")
+    
+    # Info Playlist
+    pl_display = selected_pl if selected_pl else "None"
+    ui.append(f"  {BOLD}SELECTED PLAYLIST:{RESET} {YELLOW}{pl_display}{RESET}")
+    ui.append(f"{GRAY}╟──────────────────────────────────────────────────────╢{RESET}")
+    
+    # Now Playing
+    ui.append(f"  {BOLD}NOW PLAYING{RESET}")
+    if current_track:
+        ui.append(f"  {GREEN}▶ {current_track}{RESET}")
+    else:
+        ui.append(f"  {GRAY}▶ Nothing is playing{RESET}")
+    
+    ui.append(f"{GRAY}╟──────────────────────────────────────────────────────╢{RESET}")
+    
+    # Queue
+    ui.append(f"  {BOLD}UPCOMING QUEUE{RESET}")
+    if queue:
+        for i, track in enumerate(queue[:5], 1):
+            ui.append(f"    {GRAY}{i}. {track}{RESET}")
+        if len(queue) > 5:
+            ui.append(f"    {GRAY}... and {len(queue)-5} more{RESET}")
+    else:
+        ui.append(f"    {GRAY}(Queue is empty){RESET}")
+        
+    ui.append(f"{BOLD}{CYAN}╚══════════════════════════════════════════════════════╝{RESET}")
+    
+    if last_output:
+        ui.append(f"\n{YELLOW} YTL :{RESET} {last_output}")
+    print("\n".join(ui))
 
 def main():
     display_welcome_message()
+    last_output = "welcome"
     yt_manager = YTManager()
     state = True
     while state: 
+        draw_dashboard(yt_manager.played_songs[-1] if yt_manager.played_songs else None, yt_manager.list_videos(), yt_manager.current_playlist, last_output)
         cmd = input("ytlcli> ")
         arguments = cmd.split(' ', 3)
         if arguments[0] == "help":
@@ -62,57 +116,57 @@ def main():
             try:
                 if arguments[1] in ["pl", "playlist"]:
                     query = ' '.join(arguments[2:])
-                    print(f"Searching for playlist '{query}'...")
+                    last_output = f"Searching for playlist '{query}'..."
                     videos = yt_manager.fetch_playlist(query)
                     if not videos:
-                        print("No videos found for the playlist.")
+                        last_output = f"No playlists found for '{query}'."
                     else:
                         for idx, video in enumerate(videos, start=1):
                             print(f"{idx}. {video.title} - {video.duration}")
                 else:
                     query = ' '.join(arguments[1:])
-                    print(f"Searching for '{query}'...")
+                    last_output = f"Searching for '{query}'..."
                     videos = yt_manager.search(query)
                     if not videos:
-                        print("No videos found for your search.")
+                        last_output = "No videos found for your search."
                     else:
                         for idx, video in enumerate(videos, start=1):
-                            print(f"{idx}. {video.title} - {video.duration}")
+                            last_output = f"{idx}. {video.title} - {video.duration}"
                         selection = input("Enter the number of the video to add to the queue (use 'cancel' or 'c' to skip): ")
                         if selection.lower() not in ['cancel', 'c']:
                             try:
                                 selected_index = int(selection) - 1
                                 if 0 <= selected_index < len(videos):
                                     yt_manager.add_video(videos[selected_index])
-                                    print(f"Added '{videos[selected_index].title}' to the queue.")
+                                    last_output = f"Added '{videos[selected_index].title}' to the queue."
                                 else:
-                                    print("Invalid selection. Please enter a valid number.")
+                                    last_output = "Invalid selection. Please enter a valid number."
                             except ValueError:
-                                print("Invalid input. Please enter a number or 'cancel'.")
+                                last_output = "Invalid input. Please enter a number or 'cancel'."
             except IndexError:
-                print("Usage: search <query> or / <query> to search for a song. search pl <url> or / pl <url> to search for a playlist.") 
+                last_output = "Usage: search <query> or / <query> to search for a song. search pl <url> or / pl <url> to search for a playlist." 
         elif arguments[0] in ["list", "ls"]:
             try:
                 if arguments[1] in ["playlist", "pl"]:
-                    yt_manager.show_playlists()
+                    last_output = yt_manager.show_playlists()
                 elif arguments[1] in ["queue", "q"]:
                     videos = yt_manager.list_videos()
                     if not videos:
-                        print("No videos in the playlist.")
+                        last_output = "No videos in the playlist."
                     else:
                         for idx, video in enumerate(videos, start=1):
-                            print(f"{idx}. {video.title} - {video.duration}")
+                            last_output = f"{idx}. {video.title} - {video.duration}"
                 elif arguments[1] in ["played", "recent", "history"]:
                     videos = yt_manager.played_songs
                     if not videos:
-                        print("No songs have been played yet.")
+                        last_output = "No songs have been played yet."
                     else:
                         for idx, video in enumerate(videos, start=1):
-                            print(f"{idx}. {video.title} - {video.duration}")
+                            last_output = f"{idx}. {video.title} - {video.duration}"
                 else:
-                    print(f"Unknown argument: {arguments[1]}. Use 'list playlist', 'list queue', or 'list played'.")
+                    last_output = f"Unknown argument: {arguments[1]}. Use 'list playlist', 'list queue', or 'list played'."
             except IndexError:
-                print("Usage: list <playlist|queue|played> or ls <playlist|queue|played>")
+                last_output = "Usage: list <playlist|queue|played> or ls <playlist|queue|played>"
         elif arguments[0] in ["play"]:
             if len(arguments) == 1:
                 yt_manager.play_song()
@@ -126,12 +180,12 @@ def main():
                         yt_manager.play_song()
                     else:
                         if arguments[1] not in yt_manager.playlists:
-                            print(f"Playlist '{arguments[1]}' not found.")
-                            query = ' '.join(arguments[1])
-                            print(f"Searching for '{query}'...")
+                            last_output = f"Playlist '{arguments[1]}' not found."
+                            query = ' '.join(arguments[1:])
+                            last_output = f"Searching for '{query}'..."
                             videos = yt_manager.search(query)
                             if not videos:
-                                print("No videos found for your search.")
+                                last_output = "No videos found for your search."
                             else:
                                 yt_manager.add_video(videos[0])
                                 
@@ -141,12 +195,12 @@ def main():
                             yt_manager.new_queue(videos)
                         yt_manager.play_song()
                 except IndexError:
-                    print("Usage: play or play <playlist_name> [rnd]")
+                    last_output = "Usage: play or play <playlist_name> [rnd]"
         elif arguments[0] in ["volume", "vol"]:
             try:
                 volume = int(arguments[1])
                 yt_manager.set_volume(volume)
-                print(f"Volume set to {volume}.")
+                last_output = f"Volume set to {volume}."
             except (IndexError, ValueError):
                 print("Usage: volume <0-100>")
         elif arguments[0] in ["pause"]:
@@ -163,25 +217,25 @@ def main():
                     playlist_name = arguments[2]
                     yt_manager.delete_playlist(playlist_name)
                 except IndexError:
-                    print("Usage: playlist <rm|del|delete> <playlist_name>")
+                    last_output = "Usage: playlist <rm|del|delete> <playlist_name>"
             elif arguments[1] in ["mk", "save"]:
                 try:
                     if arguments[2] not in ["queue"]:
                         playlist_url = arguments[2]
                         playlist_name = arguments[3]
                         if not yt_manager.save_playlist(playlist_url, playlist_name):
-                            print(f"Failed to save playlist '{playlist_name}'.")
+                            last_output = f"Failed to save playlist '{playlist_name}'."
                         else:
-                            print(f"Playlist '{playlist_name}' saved successfully.")
+                            last_output = f"Playlist '{playlist_name}' saved successfully."
                     else:
                         playlist_name = arguments[3]
                         videos = yt_manager.queue
                         if not videos:
-                            print("No videos in the queue to save.")
+                            last_output = "No videos in the queue to save."
                         else:
                             for video in videos:
                                 yt_manager.add_song_to_playlist(playlist_name, video)
-                            print(f"Playlist '{playlist_name}' saved successfully from the current queue.")
+                            last_output = f"Playlist '{playlist_name}' saved successfully from the current queue."
                 except IndexError:
                     print("Usage: playlist <mk|save> <playlist_url> <playlist_name>")
             elif arguments[1] in ["edit"]:
@@ -190,22 +244,22 @@ def main():
                 try:
                     if arguments[2] in ["current", "curr"]:
                         if not yt_manager.played_songs:
-                            print("No video is currently playing.")
+                            last_output = "No video is currently playing."
                         else:
                             plname = arguments[3] if len(arguments) > 3 else "music"
                             yt_manager.add_song_to_playlist(plname, yt_manager.played_songs[-1])
-                            print(f"Added the currently playing video to the '{plname}' playlist.")
+                            last_output = f"Added the currently playing video to the '{plname}' playlist."
                     else:
-                        print("Usage: playlist add current - Add the currently playing video to a saved playlist")
+                        last_output = "Usage: playlist add current - Add the currently playing video to a saved playlist"
                 except IndexError: 
-                    print("Usage: playlist add current <playlist_name> - Add the currently playing video to a saved playlist")
+                    last_output = "Usage: playlist add current <playlist_name> - Add the currently playing video to a saved playlist"
             else:    
-                print("Usage: playlist <rm|del|delete> <playlist_name> or playlist <add|save> <playlist_url> <playlist_name>")   
+                last_output = "Usage: playlist <rm|del|delete> <playlist_name> or playlist <add|save> <playlist_url> <playlist_name>"   
         elif arguments[0] in ["clear"]:
             yt_manager.new_queue([])
-            print("Queue cleared.")
+            last_output = "Queue cleared."
         else:
-           print(f"Unknown command: {cmd}. Type 'help' for a list of commands.")
+           last_output = f"Unknown command: {cmd}. Type 'help' for a list of commands."
         
         
 if __name__ == "__main__":

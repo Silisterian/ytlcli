@@ -54,7 +54,6 @@ class YTManager:
     def search(self, query: str, isplaylist: bool = False) -> List[VideoInfo]:
         try:
             results = YoutubeSearch(query, max_results=20).to_dict()
-            print(f"Search results for '{query}':")
             fetched_videos = []
             for entry in results:
                 video = VideoInfo(
@@ -78,7 +77,6 @@ class YTManager:
             if name in self.playlists:
                 print(f"Playlist '{name}' already exists. Overwriting.")    
             self.playlists[name] = {"playlist": url}
-            print(self.playlists)
             with open("playlist.json", 'w') as f:
                 json.dump(self.playlists, f)
             return True
@@ -109,7 +107,7 @@ class YTManager:
             return
         print("Available playlists:")
         for name, url in self.playlists.items():
-            print(f"{name}: {url}")
+            return f"{name}"
 
     def add_song_to_playlist(self, playlist_name: str = None, video: VideoInfo = None):
         if not playlist_name:
@@ -144,7 +142,6 @@ class YTManager:
             url = self.playlists[name]['playlist']
             songs = self.playlists[name]['songs']
         if not url:
-            print(f"Playlist '{name}' not found.")
             return []
         vids = self.fetch_playlist(url)
         if songs:
@@ -231,26 +228,18 @@ class YTManager:
         media = self.instance.media_new(url)
         
         self.player.set_media(media)
-        
         self.player.play()
-
         self.played_songs.append(current_song)
-        
         time.sleep(1)
-        
         display_title = current_song.title if current_song.title else "Unknown Title"
-        print(f"Now playing: {display_title}")
         
         if self.queue:
             next_song = self.queue[0]
             next_title = next_song.title if next_song.title else "Unknown Title"
-            print(f"Up next: {next_title}")
-        
         return self.player, self.instance
     
     def on_song_end(self, event):
         if self.queue:
-            print(f"Next song: {self.queue[0].title}")
             # Lancer play_song dans un thread séparé pour éviter le deadlock
             threading.Thread(target=self.play_song, daemon=True).start()
         else:
