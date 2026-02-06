@@ -77,7 +77,7 @@ def draw_dashboard(current_track, queue, selected_pl, last_output=None):
     # Now Playing
     ui.append(f"  {BOLD}NOW PLAYING{RESET}")
     if current_track:
-        ui.append(f"  {GREEN}▶ {current_track}{RESET}")
+        ui.append(f"  {GREEN}▶ {current_track.title}{RESET}")
     else:
         ui.append(f"  {GRAY}▶ Nothing is playing{RESET}")
     
@@ -87,7 +87,7 @@ def draw_dashboard(current_track, queue, selected_pl, last_output=None):
     ui.append(f"  {BOLD}UPCOMING QUEUE{RESET}")
     if queue:
         for i, track in enumerate(queue[:5], 1):
-            ui.append(f"    {GRAY}{i}. {track}{RESET}")
+            ui.append(f"    {GRAY}{i}. {track.title}{RESET}")
         if len(queue) > 5:
             ui.append(f"    {GRAY}... and {len(queue)-5} more{RESET}")
     else:
@@ -178,6 +178,7 @@ def main():
                         videos = yt_manager.fetch_playlistbyname(playlist_name, shuffle)
                         yt_manager.new_queue(videos)
                         yt_manager.play_song()
+                        yt_manager.current_playlist = playlist_name
                     else:
                         if arguments[1] not in yt_manager.playlists:
                             last_output = f"Playlist '{arguments[1]}' not found."
