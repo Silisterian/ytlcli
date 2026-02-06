@@ -110,6 +110,7 @@ def main():
         arguments = cmd.split(' ', 3)
         if arguments[0] == "help":
             display_help()
+            input("\nPress Enter to return to Dashboard...")
         elif arguments[0] in ["exit", "quit", 'q']:
             state = False
         elif arguments[0] in ["search", "/"]:
