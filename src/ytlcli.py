@@ -204,15 +204,19 @@ def main():
                 yt_manager.set_volume(volume)
                 last_output = f"Volume set to {volume}."
             except (IndexError, ValueError):
-                print("Usage: volume <0-100>")
+                last_output = "Usage: volume <0-100>"
         elif arguments[0] in ["pause"]:
             yt_manager.pause()
+            last_output = "Playback paused."
         elif arguments[0] in ["stop"]:
             yt_manager.stop()
+            last_output = "Playback stopped."
         elif arguments[0] in ["resume"]:
             yt_manager.resume()
+            last_output = "Playback resumed."
         elif arguments[0] in ["skip"]:
             yt_manager.skip()
+            last_output = "Skipped to the next track."
         elif arguments[0] in ["playlist", "pl"]:
             if arguments[1] in ["rm", "del", "delete"]:
                 try:

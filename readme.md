@@ -26,7 +26,6 @@
 | `ls queue` | Display current queue |
 | `ls pl` | List all saved local playlists |
 | `clear` | Wipe the current queue |
-| `pl mk <name>` | Create a new empty playlist |
-| `playlist save <url> <name>` | Import a YT playlist to local storage |
+| `pl save <url> <name>` | Import a YT playlist to local storage |
 | `pl add current <plname>` | Add the active song to a playlist |
 | `pl rm <name>` | Delete a local playlist |
