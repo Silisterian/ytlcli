@@ -48,7 +48,7 @@
 ### Playback
 | Command | Description |
 | :--- | :--- |
-| `play` | Start or resume playback |
+| `play` | Play queue |
 | `play pl <name> [rnd]` | Play a saved playlist (optional: `rnd` for shuffle) |
 | `pause` / `resume` | Control current playback |
 | `skip` | Play the next song in queue |
