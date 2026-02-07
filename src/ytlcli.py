@@ -207,16 +207,16 @@ def main():
                 last_output = "Usage: volume <0-100>"
         elif arguments[0] in ["pause"]:
             yt_manager.pause()
-            last_output = "Playback paused."
+            last_output = "Playback paused. you can resume or skip by using the associated commands. "
         elif arguments[0] in ["stop"]:
             yt_manager.stop()
-            last_output = "Playback stopped."
+            last_output = "Playback stopped. You can start the player again with 'play' or clear the queue by using clear."
         elif arguments[0] in ["resume"]:
             yt_manager.resume()
-            last_output = "Playback resumed."
+            last_output = "Playback resumed. You can also pause, skip, or stop playback with the respective commands."
         elif arguments[0] in ["skip"]:
             yt_manager.skip()
-            last_output = "Skipped to the next track."
+            last_output = "Skipped to the next track. You can also pause, stop, or resume playback with the respective commands."
         elif arguments[0] in ["playlist", "pl"]:
             if arguments[1] in ["rm", "del", "delete"]:
                 try:
@@ -263,7 +263,7 @@ def main():
                 last_output = "Usage: playlist <rm|del|delete> <playlist_name> or playlist <add|save> <playlist_url> <playlist_name>"   
         elif arguments[0] in ["clear"]:
             yt_manager.new_queue([])
-            last_output = "Queue cleared."
+            last_output = "Queue cleared. set a queue with 'play pl <playlist_name> true'."
         
             
         else:

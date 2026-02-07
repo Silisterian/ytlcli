@@ -136,22 +136,26 @@ class YTManager:
     def fetch_playlistbyname(self, name: str, sh: bool = False) -> List[VideoInfo]:
         url = None
         songs = []
-        if type(self.playlists[name]) == str:
-            url = self.playlists[name]
-        else:
-            url = self.playlists[name]['playlist']
-            if 'songs' in self.playlists[name]:
-                songs = self.playlists[name]['songs']
-        if not url:
-            return []
-        vids = self.fetch_playlist(url)
-        if songs:
-            for song in songs:
-                vids.append(VideoInfo(title=song['title'], url=song['url']))
-        if not sh:
+        try:
+            if type(self.playlists[name]) == str:
+                url = self.playlists[name]
+            else:
+                url = self.playlists[name]['playlist']
+                if 'songs' in self.playlists[name]:
+                    songs = self.playlists[name]['songs']
+            if not url:
+                return []
+            vids = self.fetch_playlist(url)
+            if songs:
+                for song in songs:
+                    vids.append(VideoInfo(title=song['title'], url=song['url']))
+            if not sh:
+                return vids
+            shuffle(vids)
             return vids
-        shuffle(vids)
-        return vids
+        except Exception as e:
+            print(f"Error fetching playlist by name: {e}")
+            return []
 
     def fetch_playlist(self, playlist_url: str) -> List[VideoInfo]:
         try:    
