@@ -140,7 +140,8 @@ class YTManager:
             url = self.playlists[name]
         else:
             url = self.playlists[name]['playlist']
-            songs = self.playlists[name]['songs']
+            if 'songs' in self.playlists[name]:
+                songs = self.playlists[name]['songs']
         if not url:
             return []
         vids = self.fetch_playlist(url)

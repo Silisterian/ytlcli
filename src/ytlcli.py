@@ -175,7 +175,7 @@ def main():
                 try:
                     if arguments[1] in ["playlist", "pl"]:
                         playlist_name = arguments[2]
-                        shuffle = len(arguments) > 3 and arguments[3] in ["rnd", "random", "shuffle"]
+                        shuffle = len(arguments) > 3 and arguments[3].lower() in ["rnd", "random", "shuffle", "true"]
                         videos = yt_manager.fetch_playlistbyname(playlist_name, shuffle)
                         yt_manager.new_queue(videos)
                         yt_manager.play_song()
@@ -264,6 +264,8 @@ def main():
         elif arguments[0] in ["clear"]:
             yt_manager.new_queue([])
             last_output = "Queue cleared."
+        
+            
         else:
            last_output = f"Unknown command: {cmd}. Type 'help' for a list of commands."
         
