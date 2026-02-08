@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+from random import shuffle
 
 from ytmanager import YTManager
 
@@ -122,8 +123,8 @@ def main():
                     if not videos:
                         last_output = f"No playlists found for '{query}'."
                     else:
-                        for idx, video in enumerate(videos, start=1):
-                            print(f"{idx}. {video.title} - {video.duration}")
+                        yt_manager.new_queue(videos)
+                        last_output = f"playlist added to queue you can use play to start player."
                 else:
                     query = ' '.join(arguments[1:])
                     last_output = f"Searching for '{query}'..."
@@ -145,7 +146,7 @@ def main():
                             except ValueError:
                                 last_output = "Invalid input. Please enter a number or 'cancel'."
             except IndexError:
-                last_output = "Usage: search <query> or / <query> to search for a song. search pl <url> or / pl <url> to search for a playlist." 
+                last_output = "Usage: search <query> or / <query> to search for a song. 'search pl <url>' or '/ pl <url>' to search for a playlist." 
         elif arguments[0] in ["list", "ls"]:
             try:
                 if arguments[1] in ["playlist", "pl"]:
@@ -167,7 +168,7 @@ def main():
                 else:
                     last_output = f"Unknown argument: {arguments[1]}. Use 'list playlist', 'list queue', or 'list played'."
             except IndexError:
-                last_output = "Usage: list <playlist|queue|played> or ls <playlist|queue|played>"
+                last_output = "Usage: list <(playlist|pl)|queue|played> or ls <(playlist|pl)|queue|played>"
         elif arguments[0] in ["play"]:
             if len(arguments) == 1:
                 yt_manager.play_song()
@@ -175,11 +176,14 @@ def main():
                 try:
                     if arguments[1] in ["playlist", "pl"]:
                         playlist_name = arguments[2]
-                        shuffle = len(arguments) > 3 and arguments[3].lower() in ["rnd", "random", "shuffle", "true"]
-                        videos = yt_manager.fetch_playlistbyname(playlist_name, shuffle)
-                        yt_manager.new_queue(videos)
-                        yt_manager.play_song()
-                        yt_manager.current_playlist = playlist_name
+                        if playlist_name in yt_manager.playlists:
+                            shuffle = len(arguments) > 3 and arguments[3].lower() in ["rnd", "random", "shuffle", "true"]
+                            videos = yt_manager.fetch_playlistbyname(playlist_name, shuffle)
+                            yt_manager.new_queue(videos)
+                            yt_manager.play_song()
+                            yt_manager.current_playlist = playlist_name
+                        else:
+                            last_output = f"no playlist named {playlist_name}. use 'ls pl' to show local playlist or create a playlist by running 'pl save <url> name'"
                     else:
                         if arguments[1] not in yt_manager.playlists:
                             last_output = f"Playlist '{arguments[1]}' not found."
@@ -192,12 +196,12 @@ def main():
                                 yt_manager.add_video(videos[0])
                                 
                         else:
-                            shuffle = len(arguments) > 2 and arguments[2] in ["rnd", "random", "shuffle"]
+                            shuffle = len(arguments) > 2 and arguments[2] in ["rnd", "random", "shuffle", 'true']
                             videos = yt_manager.fetch_playlistbyname(playlist_name, shuffle)
                             yt_manager.new_queue(videos)
                         yt_manager.play_song()
                 except IndexError:
-                    last_output = "Usage: play or play <playlist_name> [rnd]"
+                    last_output = "Usage: play or play <playlist_name> true(to randomize)"
         elif arguments[0] in ["volume", "vol"]:
             try:
                 volume = int(arguments[1])
@@ -264,7 +268,14 @@ def main():
         elif arguments[0] in ["clear"]:
             yt_manager.new_queue([])
             last_output = "Queue cleared. set a queue with 'play pl <playlist_name> true'."
-        
+        elif arguments[0] in ["rnd"]:
+            queue = yt_manager.queue
+            if not queue:
+                last_output = f"queue is empty !"
+            else:
+                shuffle(queue)
+                yt_manager.new_queue(queue)
+                last_output = f"randomizing actual queue..."
             
         else:
            last_output = f"Unknown command: {cmd}. Type 'help' for a list of commands."
