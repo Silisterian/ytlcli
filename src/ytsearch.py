@@ -46,7 +46,7 @@ class YTLSearch:
                             newvid = VideoInfo(title=item["videoRenderer"]["title"]["runs"][0]['text'],
                                                url=f'https://www.youtube.com/watch?v={item["videoRenderer"]["videoId"]}',
                                                )
-                            print(item["videoRenderer"]["title"])
+                            print(item["videoRenderer"])
                             v_name = item["videoRenderer"]["title"]
 
                             video_urls.append(newvid)
