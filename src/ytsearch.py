@@ -43,18 +43,23 @@ class YTLSearch:
                     for item in items:
                         if "videoRenderer" in item:
                             # print(item["videoRenderer"]["title"]["runs"][0]['text'])
+                            length = self.convert_to_sec(item["videoRenderer"]["lengthText"]['simpleText'])
                             newvid = VideoInfo(title=item["videoRenderer"]["title"]["runs"][0]['text'],
                                                url=f'https://www.youtube.com/watch?v={item["videoRenderer"]["videoId"]}',
+                                               duration=length
                                                )
                             print(item["videoRenderer"])
-                            v_name = item["videoRenderer"]["title"]
-
+                            
                             video_urls.append(newvid)
-                    # print(video_urls)
+                    print(video_urls)
             
 
         except KeyError as e:
             return f"Structure changed or key not found: {e}"
+    
+    def convert_to_sec(self, duration):
+        time = duration.split(":",2)
+        return int(time[0])*60 + int(time[1])
 
 def main():
     yt_search = YTLSearch()
