@@ -2,8 +2,8 @@ import requests
 import re
 import json
 from dataclasses import dataclass
-from urllib.parse import quote_plus 
-from ytmanager import VideoInfo
+from urllib.parse import quote_plus, parse_qs, unquote
+
 @dataclass
 class YTLSearch:
     def __init__(self, user_search=None,max_results=10, proxy={}, retries=3, music_only=False):
@@ -42,18 +42,12 @@ class YTLSearch:
                     
                     for item in items:
                         if "videoRenderer" in item:
-                            # print(item["videoRenderer"]["title"]["runs"][0]['text'])
-                            length = self.convert_to_sec(item["videoRenderer"]["lengthText"]['simpleText'])
-                            newvid = VideoInfo(title=item["videoRenderer"]["title"]["runs"][0]['text'],
-                                               url=f'https://www.youtube.com/watch?v={item["videoRenderer"]["videoId"]}',
-                                               duration=length
-                                               )
-                            print(item["videoRenderer"])
-                            
-                            video_urls.append(newvid)
-                    print(video_urls)
-            
-
+                            rsult = {}
+                            rsult["url"] =f'https://www.youtube.com/watch?v={item["videoRenderer"]["videoId"]}'
+                            rsult["title"] = item["videoRenderer"]["title"]["runs"][0]['text']
+                            rsult["duration"] = self.convert_to_sec(item["videoRenderer"]["lengthText"]['simpleText'])
+                            video_urls.append(rsult)
+                    return video_urls
         except KeyError as e:
             return f"Structure changed or key not found: {e}"
     
@@ -61,11 +55,15 @@ class YTLSearch:
         time = duration.split(":",2)
         return int(time[0])*60 + int(time[1])
 
-def main():
-    yt_search = YTLSearch()
-    yt_search.search("vald")
+    
+    def to_dict(self, clear_cache=True):
+        result = self.videos
+        if clear_cache:
+            self.videos = ""
+        return result
 
-
-
-if __name__=="__main__":
-    main()
+    def to_json(self, clear_cache=True):
+        result = json.dumps({"videos": self.videos})
+        if clear_cache:
+            self.videos = ""
+        return result

@@ -6,7 +6,7 @@ import warnings
 import json
 import yt_dlp
 import vlc
-from youtube_search import YoutubeSearch
+from ytsearch import YTLSearch 
 
 from dataclasses import dataclass
 from typing import List, Optional
@@ -39,7 +39,7 @@ class YTManager:
             with open("playlist.json", 'w') as f:
                 json.dump({}, f)
         self.playlists = self.load_playlist()
-
+        
         ### VLC player initialization
         self.instance = vlc.Instance()
         self.player = self.instance.media_player_new()
@@ -53,15 +53,14 @@ class YTManager:
 ###### Search management ######
     def search(self, query: str, isplaylist: bool = False) -> List[VideoInfo]:
         try:
-            results = YoutubeSearch(query, max_results=20).to_dict()
+            yts = YTLSearch()
+            results = yts.search(query)
             fetched_videos = []
             for entry in results:
                 video = VideoInfo(
                         title=entry.get('title'),
-                        url="https://www.youtube.com" + entry.get('url_suffix').split('&')[0],  # Remove playlist parameter if present
-                        duration=entry.get('duration'),
-                        description=entry.get('description'),
-                        tags=entry.get('tags')
+                        url=entry.get('url'),
+                        duration=entry.get('duration')
                     )
                 fetched_videos.append(video)
             return fetched_videos

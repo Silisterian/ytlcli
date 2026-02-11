@@ -133,7 +133,7 @@ def main():
                         last_output = "No videos found for your search."
                     else:
                         for idx, video in enumerate(videos, start=1):
-                            last_output = f"{idx}. {video.title} - {video.duration}"
+                            print(f"{idx}. {video.title} - {video.duration}")
                         selection = input("Enter the number of the video to add to the queue (use 'cancel' or 'c' to skip): ")
                         if selection.lower() not in ['cancel', 'c']:
                             try:
