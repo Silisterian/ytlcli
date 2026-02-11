@@ -35,10 +35,11 @@ class YTManager:
         self.queue = []
         self.played_songs = []
         self.current_playlist = None
+        path = self.get_playlist_path()
         if not os.path.exists("playlist.json"):
-            with open("playlist.json", 'w') as f:
+            with open(path, 'w') as f:
                 json.dump({}, f)
-        self.playlists = self.load_playlist()
+        self.playlists = self.load_playlists()
         
         ### VLC player initialization
         self.instance = vlc.Instance()
@@ -48,7 +49,7 @@ class YTManager:
         
         self.event_manager = self.player.event_manager()
         self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
-        
+    
 
 ###### Search management ######
     def search(self, query: str, isplaylist: bool = False) -> List[VideoInfo]:
@@ -73,10 +74,11 @@ class YTManager:
 ###### Playlists management ###### 
     def save_playlist(self, url: str, name: str):
         try:
+            path = self.get_playlist_path()
             if name in self.playlists:
                 print(f"Playlist '{name}' already exists. Overwriting.")    
             self.playlists[name] = {"playlist": url}
-            with open("playlist.json", 'w') as f:
+            with open(path, 'w') as f:
                 json.dump(self.playlists, f)
             return True
         except Exception as e:
@@ -85,20 +87,23 @@ class YTManager:
 
     def delete_playlist(self, name: str):
         if name in self.playlists:
+            path = self.get_playlist_path()
             del self.playlists[name]
-            with open("playlist.json", 'w') as f:
+            with open(path, 'w') as f:
                 json.dump(self.playlists, f)
             print(f"Playlist '{name}' deleted successfully.")
         else:
             print(f"Playlist '{name}' not found.")
     
-    def load_playlist(self):
-        try:
-            with open("playlist.json", 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except json.JSONDecodeError:
-            print("Fichier JSON corrompu, création d'un nouveau")
-        return {}
+    def load_playlists(self):
+        path = self.get_playlist_path()
+        print(path)
+        if not os.path.exists(path):
+            with open(path, 'w') as f:
+                json.dump({}, f)
+            return {}
+        with open(path, 'r') as f:
+            return json.load(f)
 
     def show_playlists(self):
         if not self.playlists:
@@ -125,9 +130,22 @@ class YTManager:
             lcount = len(old_entity[playlist_name]["songs"])
             old_entity[playlist_name]["songs"].append({"id": lcount + 1, "url": video.url, "title": video.title})
         self.playlists = old_entity
-        with open("playlist.json", 'w') as f:
+        path = self.get_playlist_path()
+        with open(path, 'w') as f:
                 json.dump(self.playlists, f)
 
+    def get_playlist_path(self):
+        return os.path.join(self.get_data_dir(), 'playlist.json')
+    
+    def get_data_dir(self):
+        if os.name == 'nt':  # Windows
+            base = os.environ.get('APPDATA', os.path.expanduser('~'))
+        else:  # Linux/Mac
+            base = os.path.join(os.path.expanduser('~'), '.config')
+        
+        data_dir = os.path.join(base, 'ytl-player')
+        os.makedirs(data_dir, exist_ok=True)
+        return data_dir
 
 ### These methods are used to fetch videos from a playlist, either by name or by URL. The fetch_playlistbyname method looks up the local playlist based on the provided name and then calls fetch_playlist to retrieve the video information. If the sh parameter is set to True, it shuffles the list of videos before returning it. The fetch_playlist method uses yt_dlp to extract information about each video in the playlist and returns a list of VideoInfo objects containing details about each video.
 ### fetched video are added to queue
