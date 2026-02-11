@@ -7,8 +7,7 @@ name = "ytlcli"
 version = "0.1.0"
 dependencies = [
     "yt-dlp",
-    "python-vlc",
-    "youtube-search"
+    "python-vlc"
 ]
 
 [project.scripts]
@@ -16,5 +15,5 @@ ytl = "ytlcli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["ytlcli", "ytmanager"]
+py-modules = ["ytlcli", "ytmanager", "ytsearch"]
 packages = []
