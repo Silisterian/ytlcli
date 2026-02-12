@@ -34,9 +34,15 @@ def load_playlists():
 
 def handle_command(cmd):
     action = cmd.get("action")
+    returnlist = {}
     if action == "get_playlists":
-        return list(yt.playlists.keys())
-    
+        returnlist['action'] = action
+        returnlist['data'] = list(yt.playlists.keys())
+        print(returnlist)
+        return returnlist
+
+
+# to test run in cmd : echo '{"action": "get_playlists"}' | python src/ytl_bridge.py
 for line in sys.stdin:
     try:
         cmd = json.loads(line.strip())

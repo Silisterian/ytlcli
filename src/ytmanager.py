@@ -36,7 +36,7 @@ class YTManager:
         self.played_songs = []
         self.current_playlist = None
         path = self.get_playlist_path()
-        if not os.path.exists("playlist.json"):
+        if not os.path.exists(path):
             with open(path, 'w') as f:
                 json.dump({}, f)
         self.playlists = self.load_playlists()
