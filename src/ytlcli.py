@@ -106,7 +106,7 @@ def main():
     yt_manager = YTManager()
     state = True
     while state: 
-        # draw_dashboard(yt_manager.played_songs[-1] if yt_manager.played_songs else None, yt_manager.list_videos(), yt_manager.current_playlist, last_output)
+        draw_dashboard(yt_manager.played_songs[-1] if yt_manager.played_songs else None, yt_manager.list_videos(), yt_manager.current_playlist, last_output)
         cmd = input("ytlcli> ")
         arguments = cmd.split(' ', 3)
         if arguments[0] == "help":

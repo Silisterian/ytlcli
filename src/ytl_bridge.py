@@ -34,12 +34,21 @@ def load_playlists():
 
 def handle_command(cmd):
     action = cmd.get("action")
+    data = None
+    if cmd.get('data'):
+        data=cmd.get('data')
     returnlist = {}
+    returnlist['action']= action
     if action == "get_playlists":
-        returnlist['action'] = action
-        returnlist['data'] = list(yt.playlists.keys())
+        returnlist['data'] = list(yt.playlists)
         print(returnlist)
         return returnlist
+    elif action == "get_media_pl":
+        videos = list(yt.fetch_playlistbyname(data))
+        returnlist['data'] = yt.videoInfoToJson(videos)
+        return returnlist
+    
+
 
 
 # to test run in cmd : echo '{"action": "get_playlists"}' | python src/ytl_bridge.py

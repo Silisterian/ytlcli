@@ -50,6 +50,17 @@ class YTManager:
         self.event_manager = self.player.event_manager()
         self.event_manager.event_attach(vlc.EventType.MediaPlayerEndReached, self.on_song_end)
     
+    def videoInfoToJson(self, list) -> List:
+        jsonlist = []
+        for song in list:
+            detailsong = {}
+            detailsong['title'] = song.title
+            detailsong['url'] = song.url
+            detailsong['duration'] = song.duration
+            jsonlist.append(detailsong)
+        return jsonlist
+            
+            
 
 ###### Search management ######
     def search(self, query: str, isplaylist: bool = False) -> List[VideoInfo]:
@@ -188,7 +199,6 @@ class YTManager:
                         tags=entry.get('tags')
                     )
                     fetched_videos.append(video)
-
             return fetched_videos
         except Exception as e:
             print(f"Error fetching playlist: {e}")
