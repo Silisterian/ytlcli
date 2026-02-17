@@ -43,13 +43,36 @@ class YTLSearch:
             for section in sections:
                 if "itemSectionRenderer" in section:
                     items = section["itemSectionRenderer"]["contents"]
-                    
+                    # print(items[-1])
                     for item in items:
                         if "videoRenderer" in item:
                             rsult = {}
                             rsult["url"] =f'https://www.youtube.com/watch?v={item["videoRenderer"]["videoId"]}'
                             rsult["title"] = item["videoRenderer"]["title"]["runs"][0]['text']
                             rsult["duration"] = self.convert_to_sec(item["videoRenderer"]["lengthText"]['simpleText'])
+                            rsult['img'] = item['videoRenderer']['thumbnail']['thumbnails'][0]['url']
+                            rsult['OP'] = item['videoRenderer']['longBylineText']['runs'][0]['text']
+                            viewcount = item['videoRenderer']['viewCountText']['simpleText'].replace('\xa0', ' ').replace('\u202f', '').lower()
+                            match = re.search(r'([\d,\.]+)\s*(k|m|md)?', viewcount)
+                            if match:
+                                nombre_str = match.group(1).replace(',', '.')
+                                suffixe = match.group(2)
+                                try:
+                                    valeur = float(nombre_str)
+                                    
+                                    # Application du multiplicateur
+                                    if suffixe == 'k':
+                                        valeur *= 1_000
+                                    elif suffixe == 'm':
+                                        valeur *= 1_000_000
+                                    elif suffixe == 'md':
+                                        valeur *= 1_000_000_000
+                                    rsult["views"] = int(valeur)
+                                except ValueError as e:
+                                    return f"Structure changed or key not found: {e}"
+                                    
+                            
+                            
                             video_urls.append(rsult)
                     return video_urls
         except KeyError as e:
@@ -71,3 +94,4 @@ class YTLSearch:
         if clear_cache:
             self.videos = ""
         return result
+    

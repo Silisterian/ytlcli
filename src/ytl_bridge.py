@@ -44,13 +44,29 @@ def handle_command(cmd):
         print(returnlist)
         return returnlist
     elif action == "get_media_pl":
+        if not data:
+            returnlist['data'] = 'no data passed'
+            return returnlist
         videos = list(yt.fetch_playlistbyname(data))
+        returnlist['target'] = data
         returnlist['data'] = yt.videoInfoToJson(videos)
         return returnlist
+    elif action == "get_media_pl_url":
+        if not data: 
+            returnlist['data'] = 'no data passed'
+            return returnlist
+        videos = list(yt.fetch_playlist(data))
+    elif action == "get_media":
+        if not data:
+            returnlist['data'] = "no media passed"
+            return returnlist
+        returnlist['data'] = yt.get_url_song(data)
+        return returnlist
+        
     
 
 
-
+# to generate exe pyinstaller --onefile --name ytl_bridge --add-data "src/ytmanager.py;." --add-data "src/ytsearch.py;." --add-data "playlist.json;." src/ytl_bridge.py
 # to test run in cmd : echo '{"action": "get_playlists"}' | python src/ytl_bridge.py
 for line in sys.stdin:
     try:
