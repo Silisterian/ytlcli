@@ -20,6 +20,8 @@ class VideoInfo:
     duration: Optional[int] = None  # Duration in seconds
     description: Optional[str] = None
     tags: Optional[List[str]] = None
+    artist: Optional[str] = None
+    thumbnail: Optional[str] = None
 
 
 
@@ -196,7 +198,9 @@ class YTManager:
                         url=entry.get('url'),
                         duration=entry.get('duration'),
                         description=entry.get('description'),
-                        tags=entry.get('tags')
+                        tags=entry.get('tags'),
+                        artist=entry.get('channel'),
+                        thumbnail=entry.get("thumbnails")[0]['url']
                     )
                     fetched_videos.append(video)
             return fetched_videos
